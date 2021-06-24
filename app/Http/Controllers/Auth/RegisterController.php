@@ -78,6 +78,7 @@ class RegisterController extends Controller
 
             // Set user avatar name
             $user->avatar = $avatar_name;
+            $user->save();
 
             // Upload image
             $data["avatar"]->storeAs("public/avatars", $avatar_name);
