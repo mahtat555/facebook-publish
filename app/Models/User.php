@@ -41,4 +41,18 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the pages for the User.
+     */
+    public function pages() {
+        return $this->hasMany(Page::class);
+    }
+
+    /**
+     * Get the pages for the User.
+     */
+    public function posts() {
+        return $this->hasManyThrough(Post::class, Page::class);
+    }
 }

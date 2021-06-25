@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PostsController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -30,25 +34,25 @@ Auth::routes();
 // Account Page
 Route::get(
     '/account',
-    [App\Http\Controllers\DashboardController::class, 'index']
+    [DashboardController::class, 'index']
 )->name('account.index');
 
 // Dashboard Page
 Route::get(
     '/dashboard',
-    [App\Http\Controllers\DashboardController::class, 'dashboard']
+    [DashboardController::class, 'dashboard']
 )->name('account.dashboard');
 
 // Profile Page
 Route::get(
     '/profile',
-    [App\Http\Controllers\DashboardController::class, 'profile']
+    [DashboardController::class, 'profile']
 )->name('account.profile');
 
 // Security Page
 Route::get(
     '/security',
-    [App\Http\Controllers\DashboardController::class, 'security']
+    [DashboardController::class, 'security']
 )->name('account.security');
 
 
@@ -58,11 +62,23 @@ Route::get(
 // Publish Page
 Route::get(
     '/publish',
-    fn () => view("publish.index")
-    //[App\Http\Controllers\DashboardController::class, 'index']
+    [PostsController::class, 'index']
 )->name('publish.index');
 
+// Create and/or Publish posts
 Route::post(
     '/publish',
-    [App\Http\Controllers\DashboardController::class, 'pub']
-);
+    [PostsController::class, 'store']
+)->name('publish.create');
+
+// Edit and/or Publish posts
+Route::put(
+    '/publish/{id}',
+    [PostsController::class, 'update']
+)->name('publish.update');
+
+// Delete posts
+Route::delete(
+    '/publish/{id}',
+    [PostsController::class, 'destroy']
+)->name('publish.delete');

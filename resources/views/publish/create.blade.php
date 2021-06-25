@@ -1,14 +1,14 @@
-<form action="/publish" method="POST" enctype="multipart/form-data">
+<form action=@yield('action', "/publish") method="POST" enctype="multipart/form-data">
     @csrf
 
-    <div class="modal" id="create_post">
+    <div class="modal" id=@yield("modal_id", "create_post")>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
 
                     {{-- Modal Title --}}
                     <h4 class="modal-title">
-                        Create Post
+                       @yield('modal_title', "Create Post")
                     </h4>
 
                     {{-- For closing--}}
@@ -50,39 +50,45 @@
                         <label for="description" >{{ __('Select Page to Post To') }}</label>
 
                         <select title="select page" class="form-control selectpicker" name="page">
-                            <option> page 1 </option>
-                            <option> page 2 </option>
-                            <option> page 3 </option>
-                            </select>
+                            @foreach (Auth::user()->pages as $page)
+                                <option value="{{ $page->id }}"> Page {{ $page->id }} </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
                 {{-- Modal Footer --}}
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary"> Publish Now </button>
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#schedule"> Schedule </button>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target=@yield("schedule_id", "#create_schedule")> Schedule </button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cancel </button>
                 </div>
         </div>
         </div>
     </div>
 
-    <div class="modal" id="schedule" data-backdrop="static">
+
+    <!-- Schedule Section -->
+    <div class="modal" id=@yield("schedule_id", "create_schedule") data-backdrop="static">
         <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-            <h4 class="modal-title">2nd Modal title</h4>
+              <!-- Schedule Title -->
+            <h4 class="modal-title">
+                @yield("schedule_title", "Schedule Post")
+            </h4>
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             </div><div class="container"></div>
 
                 <div class="modal-body">
-                    <div class="form-group">
-                        <input class="form-control" name="description">
-                    </div>
+                    <input class="form-control" type="datetime-local" id="meeting-time" name="meeting-time"
+                        value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
                 </div>
+
+                {{-- Schedule Footer --}}
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary"> Sand </button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"> Schedule </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cancel </button>
                 </div>
             </div>
         </div>

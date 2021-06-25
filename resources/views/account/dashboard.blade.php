@@ -13,8 +13,10 @@
                                 {{ session('status') }}
                             </div>
                         @endif
-
-                        {{ __('You are logged in!') }}
+                        <p class="text-center">
+                            <a class="btn btn-outline-primary" role="button" href="{{ route('publish.index') }}"> Publish </a>
+                            <a class="btn btn-outline-primary" role="button" href="{{ route('publish.index') }}"> Connect </a>
+                        </p>
                     </div>
                 </div>
             </div>
