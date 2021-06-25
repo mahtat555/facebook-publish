@@ -20,6 +20,10 @@ Route::get('/', function () {
     return view("home");
 })->name("home");
 
+/**************************
+ ****   Account Page   ****
+ **************************/
+
 // Authentication
 Auth::routes();
 
@@ -27,7 +31,7 @@ Auth::routes();
 Route::get(
     '/account',
     [App\Http\Controllers\DashboardController::class, 'index']
-)->name('account.account');
+)->name('account.index');
 
 // Dashboard Page
 Route::get(
@@ -46,3 +50,19 @@ Route::get(
     '/security',
     [App\Http\Controllers\DashboardController::class, 'security']
 )->name('account.security');
+
+
+/**************************
+ ****   Publish Page   ****
+ **************************/
+// Publish Page
+Route::get(
+    '/publish',
+    fn () => view("publish.index")
+    //[App\Http\Controllers\DashboardController::class, 'index']
+)->name('publish.index');
+
+Route::post(
+    '/publish',
+    [App\Http\Controllers\DashboardController::class, 'pub']
+);

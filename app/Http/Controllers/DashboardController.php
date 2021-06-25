@@ -61,4 +61,9 @@ class DashboardController extends Controller
     {
         return view('account.security');
     }
+
+    public function pub(Request $request)
+    {
+        return $request;
+    }
 }

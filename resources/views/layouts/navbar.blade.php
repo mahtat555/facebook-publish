@@ -6,7 +6,7 @@
 
                 {{-- Publish Page --}}
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('login') }}">{{ __('Publish') }}</a>
+                    <a class="nav-link active" href="{{ route('publish.index') }}">{{ __('Publish') }}</a>
                 </li>
 
                 <!-- Vertical Separator -->
@@ -22,7 +22,7 @@
 
                 {{-- Account Page --}}
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('account.account') }}">{{ __('Account') }}</a>
+                    <a class="nav-link active" href="{{ route('account.index') }}">{{ __('Account') }}</a>
                 </li>
             </ul>
 
@@ -53,7 +53,7 @@
                         <img src="/storage/avatars/{{ Auth::user()->avatar }}" width="40" height="40" class="rounded-circle">
 
                         {{-- User Name --}}
-                        {{ Auth::user()->name }}
+                        {{ strlen(Auth::user()->name) <= 20 ? Auth::user()->name : substr(Auth::user()->name, 0, 19) . "...";  }}
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
