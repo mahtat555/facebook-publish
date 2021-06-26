@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class PostsController extends Controller
+use App\Models\Page;
+
+class PagesController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -23,9 +25,9 @@ class PostsController extends Controller
      */
     public function index()
     {
-        return view("publish.index")->with(
-            "posts",
-            auth()->user()->posts()->orderBy("create_at", "desc")->paginate(2)
+        return view("connect.index")->with(
+            "pages",
+            auth()->user()->pages()->orderBy("created_at", "desc")->paginate(2)
         );
     }
 
@@ -37,18 +39,16 @@ class PostsController extends Controller
      */
     public function store(Request $request)
     {
-        return $request;
-    }
+        // validation
+        // storage
+        foreach ($request->get("pages") as $_page) {
+            $page = new Page;
+            $page->user_id = auth()->user()->id;
+            $page->created_at = now();
+            $page->save();
+        }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
+        return $this->index();
     }
 
     /**
@@ -58,12 +58,16 @@ class PostsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update($id)
     {
-        return [
-            $request,
-            $id
-        ];
+        $page = Page::find($id);
+
+        if (isset($page)) {
+            $page->created_at = now();
+            $page->save();
+        }
+
+        return $this->index();
     }
 
     /**
@@ -74,6 +78,12 @@ class PostsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $page = Page::find($id);
+
+        if (isset($page)) {
+            $page->delete();
+        }
+
+        return $this->index();
     }
 }

@@ -1,14 +1,14 @@
-<form action=@yield('action', "/publish") method="POST" enctype="multipart/form-data">
+<form id="form_id" action={{ route("publish.create") }} method="POST" enctype="multipart/form-data">
     @csrf
 
-    <div class="modal" id=@yield("modal_id", "create_post")>
+    <div class="modal" id=@yield("post_modal_id", "create_post")>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
 
                     {{-- Modal Title --}}
                     <h4 class="modal-title">
-                       @yield('modal_title', "Create Post")
+                       @yield('post_modal_title', "Create Post")
                     </h4>
 
                     {{-- For closing--}}
@@ -30,10 +30,10 @@
                         <div class="border border-5 text-center">
 
                             {{-- Add Image --}}
-                            <label for="add_iamge">
+                            <label for="add_image">
                                 <svg style="margin:10px" class="bi me-2" width="30" height="30"><use xlink:href="#image"/></svg>
                             </label>
-                            <input id="add_iamge" style="display:none" type="file" name="image">
+                            <input accept="image/*" id="add_image" style="display:none" type="file" name="image">
                             </a>
 
                             {{-- Add Video --}}
@@ -42,6 +42,16 @@
                             </label>
                             <input id="add_video" style="display:none" type="file" name="video">
                             </a>
+
+                            <div>
+                                {{--  To display the image selected by the user --}}
+                                <img id="show_image" style="display:none">
+
+                                {{-- To display the video selected by the user --}}
+                                <video id="show_video" style="display:none" width="320" height="240" controls>
+                                    <source type="video/mp4">
+                                </video>
+                            </div>
                         </div>
                     </div>
 
@@ -60,7 +70,7 @@
                 {{-- Modal Footer --}}
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary"> Publish Now </button>
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target=@yield("schedule_id", "#create_schedule")> Schedule </button>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target=@yield("schedule_button_id", "#create_schedule")> Schedule </button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cancel </button>
                 </div>
         </div>
@@ -69,13 +79,13 @@
 
 
     <!-- Schedule Section -->
-    <div class="modal" id=@yield("schedule_id", "create_schedule") data-backdrop="static">
+    <div class="modal" id=@yield("schedule_modal_id", "create_schedule") data-backdrop="static">
         <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
               <!-- Schedule Title -->
             <h4 class="modal-title">
-                @yield("schedule_title", "Schedule Post")
+                @yield("schedule_modal_title", "Schedule Post")
             </h4>
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             </div><div class="container"></div>

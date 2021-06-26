@@ -9,6 +9,9 @@ class Page extends Model
 {
     use HasFactory;
 
+    // Indicates if the model should be timestamped.
+    public $timestamps = false;
+
      /**
      * Get the posts for the Page.
      */

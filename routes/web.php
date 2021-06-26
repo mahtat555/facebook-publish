@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PostsController;
+use App\Http\Controllers\PagesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,10 +76,38 @@ Route::post(
 Route::put(
     '/publish/{id}',
     [PostsController::class, 'update']
-)->name('publish.update');
+)->name('publish.edit');
 
 // Delete posts
 Route::delete(
     '/publish/{id}',
     [PostsController::class, 'destroy']
 )->name('publish.delete');
+
+
+/**************************
+ ****   Connect Page   ****
+ **************************/
+// Connect Page
+Route::get(
+    '/connect',
+    [PagesController::class, 'index']
+)->name('connect.index');
+
+// Select some Facebook pages
+Route::post(
+    '/connect',
+    [PagesController::class, 'store']
+)->name('connect.select');
+
+// Reconnect to Facebook pages
+Route::put(
+    '/connect/{id}',
+    [PagesController::class, 'update']
+)->name('connect.update');
+
+// Delete Facebook pages
+Route::delete(
+    '/connect/{id}',
+    [PagesController::class, 'destroy']
+)->name('connect.delete');
