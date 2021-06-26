@@ -27,11 +27,11 @@
 <body>
     <div id="app">
 
-        {{-- navbar page --}}
+        <!-- navbar page -->
         @include("layouts.navbar")
 
         <main class="container">
-            {{-- Errors messages --}}
+            <!-- Errors messages -->
             @include("layouts.messages")
 
             @yield('content')

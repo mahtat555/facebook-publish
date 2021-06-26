@@ -55,4 +55,11 @@ class User extends Authenticatable
     public function posts() {
         return $this->hasManyThrough(Post::class, Page::class);
     }
+
+    /**
+     * Check if this page is for this user.
+     */
+    public function hasPage($page_id) {
+        return $this->id === Page::find($page_id)->user_id;
+    }
 }

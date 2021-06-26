@@ -21,10 +21,10 @@
             @foreach ($pages as $page)
                 <tr>
                     <td> Page {{ $page->id }} </td>
-                    <td class="col-lg-3"> {{ date('F j, Y H:i:s', strtotime($page->created_at)) }} </td>
+                    <td class="col-lg-3"> {{ $page->created_at->format("F j, Y H:i:s") }} </td>
                     <td>
                         <div class="row float-right">
-                            <form action="{{ route("connect.update", $page->id) }}" method="POST">
+                            <form action="{{ route("connect.reconnect", $page->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <input class="btn btn-primary btn-sm" type="submit" value="Reconnect">

@@ -58,7 +58,7 @@ Route::get(
 
 
 /**************************
- ****   Publish Page   ****
+ ****   Publish page   ****
  **************************/
 // Publish Page
 Route::get(
@@ -66,11 +66,23 @@ Route::get(
     [PostsController::class, 'index']
 )->name('publish.index');
 
+// Show specified Post
+Route::get(
+    '/publish/{id}',
+    [PostsController::class, 'show']
+)->name('publish.show');
+
 // Create and/or Publish posts
 Route::post(
     '/publish',
     [PostsController::class, 'store']
 )->name('publish.create');
+
+// Share post on Facebook
+Route::post(
+    '/publish/{id}',
+    [PostsController::class, 'share']
+)->name('publish.share');
 
 // Edit and/or Publish posts
 Route::put(
@@ -104,7 +116,7 @@ Route::post(
 Route::put(
     '/connect/{id}',
     [PagesController::class, 'update']
-)->name('connect.update');
+)->name('connect.reconnect');
 
 // Delete Facebook pages
 Route::delete(

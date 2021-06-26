@@ -13,23 +13,18 @@ class Post extends Model
     public $timestamps = false;
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
+    /**
      * Get the Page that owns the Post.
      */
     public function page() {
         return $this->belongsTo(Page::class);
-    }
-
-    /**
-     * Get the User that owns the Post.
-     */
-    public function user() {
-        return $this->hasOneThrough(
-            Post::class,
-            Page::class,
-            'user_id',
-            'page_id',
-            'id',
-            'id'
-        );
     }
 }

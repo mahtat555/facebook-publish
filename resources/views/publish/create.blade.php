@@ -21,7 +21,7 @@
                     {{-- Post Description --}}
                     <div class="form-group">
                         <label for="description" >{{ __('Post Description') }}</label>
-                        <textarea id="description" class="form-control" name="text" value="{{ old('text') }}" required> </textarea>
+                        <textarea id="description" class="form-control" name="description" value="{{ old('text') }}"> </textarea>
                     </div>
 
                     {{-- Add Image or Video --}}
@@ -40,15 +40,15 @@
                             <label for="add_video">
                                 <svg class="bi me-2" width="30" height="30"><use xlink:href="#video"/></svg>
                             </label>
-                            <input id="add_video" style="display:none" type="file" name="video">
+                            <input accept="video/*" id="add_video" style="display:none" type="file" name="video">
                             </a>
 
                             <div>
                                 {{--  To display the image selected by the user --}}
-                                <img id="show_image" style="display:none">
+                                <img  width="500" height="400" id="show_image" style="display:none">
 
                                 {{-- To display the video selected by the user --}}
-                                <video id="show_video" style="display:none" width="320" height="240" controls>
+                                <video id="show_video" style="display:none" width="500" height="400" controls>
                                     <source type="video/mp4">
                                 </video>
                             </div>
@@ -59,7 +59,7 @@
                     <div class="form-group">
                         <label for="description" >{{ __('Select Page to Post To') }}</label>
 
-                        <select title="select page" class="form-control selectpicker" name="page">
+                        <select title="select page" class="form-control selectpicker" name="page_id">
                             @foreach (Auth::user()->pages as $page)
                                 <option value="{{ $page->id }}"> Page {{ $page->id }} </option>
                             @endforeach
@@ -69,7 +69,7 @@
 
                 {{-- Modal Footer --}}
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary"> Publish Now </button>
+                    <button type="submit" onclick="publishNow()" class="btn btn-primary"> Publish Now </button>
                     <button type="button" class="btn btn-success" data-toggle="modal" data-target=@yield("schedule_button_id", "#create_schedule")> Schedule </button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cancel </button>
                 </div>
@@ -91,8 +91,8 @@
             </div><div class="container"></div>
 
                 <div class="modal-body">
-                    <input class="form-control" type="datetime-local" id="meeting-time" name="meeting-time"
-                        value="2018-06-12T19:30" min="2018-06-07T00:00" max="2018-06-14T00:00">
+                    <input class="form-control" type="datetime-local" id="schedule" name="schedule"
+                        value="{{ now() }}" min="{{ now() }}">
                 </div>
 
                 {{-- Schedule Footer --}}

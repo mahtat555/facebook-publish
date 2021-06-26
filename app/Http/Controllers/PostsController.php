@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+use App\Models\Post;
 
 class PostsController extends Controller
 {
@@ -23,10 +26,10 @@ class PostsController extends Controller
      */
     public function index()
     {
-        return view("publish.index")->with(
-            "posts",
-            auth()->user()->posts()->orderBy("create_at", "desc")->paginate(2)
-        );
+        $post = auth()->user()->posts()
+            ->orderBy("created_at", "desc")->paginate(6);
+
+        return view("publish.index")->with("posts", $post);
     }
 
     /**
@@ -37,7 +40,89 @@ class PostsController extends Controller
      */
     public function store(Request $request)
     {
-        return $request;
+        // Validation
+        // Create new Post
+        $post = new Post;
+
+        // Handle social media (Image/Video) upload
+        $post->type = "Status";
+        $post->media = "null";
+        $post->description = $request->description ?? "null";
+        if (isset($request->image)) {
+            $post->media = "__" . time() . "_"
+                . $request->image->getClientOriginalName();
+            $post->type = "Image";
+        } else {
+            if (isset($request->video)) {
+                $post->media = "__" . time() . "_"
+                    . $request->video->getClientOriginalName();
+                $post->type = "Video";
+            } else {
+                if (!isset($request->description)) {
+                    return redirect()->route("publish.index");
+                }
+            }
+        }
+
+        // Handle Schedule Posts
+        $post->created_at = now();
+        if (isset($request->schedule)) {
+            $post->created_at = $request->schedule;
+            if ($post->created_at < now()) {
+                $post->created_at = now();
+            }
+        }
+
+        // Page Id (The page selected to post on)
+        if (isset($request->page_id)) {
+            if (auth()->user()->hasPage($request->page_id)) {
+                $post->page_id = $request->page_id;
+            } else {
+                return redirect()->route("publish.index");
+            }
+        } else {
+            return redirect()->route("publish.index");
+        }
+
+        $post->save();
+
+        // Upload the Media
+        if ($post->type === "video") {
+            $request->video->storeAs("public/videos", $post->media);
+        }
+        if ($post->type === "Image") {
+            $request->image->storeAs("public/images", $post->media);
+        }
+
+        // Share it on Facebook
+        // ....
+
+        return $this->index();
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function share($id)
+    {
+        $post = Post::find($id);
+
+        // check for the correct User
+        if ($this->__checkCorrectUser($post)) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
+        $post->created_at = now();
+        $post->save();
+
+        // Share it on Facebook
+        // ....
+
+        return $this->index();
     }
 
     /**
@@ -48,7 +133,16 @@ class PostsController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::find($id);
+
+        // check for the correct User
+        if ($this->__checkCorrectUser($post)) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
+
+        return view("publish.show")->with("post", $post);
     }
 
     /**
@@ -60,6 +154,15 @@ class PostsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $post = Post::find($id);
+
+        // check for the correct User
+        // check for the correct User
+        if ($this->__checkCorrectUser($post)) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
         return [
             $request,
             $id
@@ -74,6 +177,32 @@ class PostsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::find($id);
+
+        // check for the correct User
+        if ($this->__checkCorrectUser($post)) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
+        $post->delete();
+
+        // Remove Media
+        if ($post->type === "Video") {
+            Storage::delete("public/videos/" . $post->media);
+        } else if ($post->type === "Image") {
+            Storage::delete("public/images/" . $post->media);
+        }
+
+        return $this->index();
+    }
+
+    /**
+     * Check for the correct User
+     */
+    private function __checkCorrectUser($post)
+    {
+        return (!isset($post)) ||
+            (auth()->user()->id !== $post->page->user->id);
     }
 }

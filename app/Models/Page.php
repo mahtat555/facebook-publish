@@ -12,7 +12,16 @@ class Page extends Model
     // Indicates if the model should be timestamped.
     public $timestamps = false;
 
-     /**
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
+
+    /**
      * Get the posts for the Page.
      */
     public function posts() {
