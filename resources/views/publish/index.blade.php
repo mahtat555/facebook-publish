@@ -26,7 +26,7 @@
                     <td class="col-lg-2"> {{ $post->created_at->format("d/m/Y H:i:s") }} </td>
                     <td class="col-lg-3">
                         <div class="row float-right">
-                            @if ($post->created_at > now())
+                            @if ($post->scheduled)
 
                                 {{-- Share the post Now --}}
                                 <form action="{{ route("publish.share", $post->id) }}" method="POST">

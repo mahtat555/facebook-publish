@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 use App\Models\Post;
 
@@ -11,8 +12,6 @@ class PostsController extends Controller
 {
     /**
      * Create a new controller instance.
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -51,7 +50,7 @@ class PostsController extends Controller
     }
 
     /**
-     * Share the publish on Facebook.
+     * Share the Post Now.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -66,11 +65,17 @@ class PostsController extends Controller
                 ->with("error", "Unauthorized Page");
         }
 
+        if (!$post->scheduled) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
+        $post->scheduled = false;
         $post->created_at = now();
         $post->save();
 
         // Share it on Facebook
-        // ....
+        $this->share_fb($post);
 
         return $this->index();
     }
@@ -113,7 +118,8 @@ class PostsController extends Controller
                 ->with("error", "Unauthorized Page");
         }
 
-        if ($post->created_at < now()) {
+        // We can only update scheduled posts
+        if (!$post->scheduled) {
             return redirect()->route("publish.index")
                 ->with("error", "Unauthorized Update");
         }
@@ -173,11 +179,13 @@ class PostsController extends Controller
      * Get data from User ($request) and
      * Storage the post into Database
      */
-    private function __storage($request, $post) {
+    private function __storage($request, $post)
+    {
         // Handle social media (Image/Video) upload
         $post->type = "Status";
         $post->media = "null";
         $post->description = $request->description ?? "null";
+
         if (isset($request->image)) {
             $post->media = "__" . time() . "_"
                 . $request->image->getClientOriginalName();
@@ -189,29 +197,30 @@ class PostsController extends Controller
                 $post->type = "Video";
             } else {
                 if (!isset($request->description)) {
-                    return redirect()->route("publish.index");
+                    return redirect()->route("publish.index")
+                        ->with("error", "This post is empty");
                 }
             }
         }
 
         // Handle Schedule Posts
         $post->created_at = now();
+
         if (isset($request->schedule)) {
             $post->created_at = $request->schedule;
+            $post->scheduled = true;
             if ($post->created_at < now()) {
                 $post->created_at = now();
+                $post->scheduled = false;
             }
         }
 
         // Page Id (The page selected to post on)
-        if (isset($request->page_id)) {
-            if (auth()->user()->hasPage($request->page_id)) {
-                $post->page_id = $request->page_id;
-            } else {
-                return redirect()->route("publish.index");
-            }
+        if (auth()->user()->hasPage($request->page_id)) {
+            $post->page_id = $request->page_id;
         } else {
-            return redirect()->route("publish.index");
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
         }
 
         $post->save();
@@ -225,15 +234,16 @@ class PostsController extends Controller
         }
 
         // Share the post on Facebook
-        if ($post->created_at <= now()) {
-            $this->share($post->id);
+        if (!$post->scheduled) {
+            $this->share_fb($post);
         }
     }
 
     /**
      * Validate the data in the request.
      */
-    private function __validate($request) {
+    private function __validate($request)
+    {
         $this->validate($request, [
             'description' => 'max:65535',
             'video' => 'mimes:mp4,ogx,oga,ogv,ogg,webm|nullable|max:19999',
@@ -241,5 +251,19 @@ class PostsController extends Controller
             'page_id' => 'required|exists:pages,id',
             'schedule' => 'date_format:Y-m-d H:i:s'
         ]);
+    }
+
+
+    /**
+     * Share the Posts On Facebook.
+     *
+     * @param  Post  $post  The post to share
+     */
+    public function share_fb($post)
+    {
+        $post->scheduled = false;
+        $post->save();
+
+       // Share the Posts On Facebook.
     }
 }

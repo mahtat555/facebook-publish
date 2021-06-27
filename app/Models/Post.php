@@ -19,6 +19,7 @@ class Post extends Model
      */
     protected $casts = [
         'created_at' => 'datetime',
+        'scheduled' => "boolean"
     ];
 
     /**
