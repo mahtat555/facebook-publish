@@ -40,10 +40,140 @@ class PostsController extends Controller
      */
     public function store(Request $request)
     {
-        // Validation
-        // Create new Post
+        $this->__validate($request);
+
         $post = new Post;
 
+        // Storage the data
+        $this->__storage($request, $post);
+
+        return $this->index();
+    }
+
+    /**
+     * Share the publish on Facebook.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function share($id)
+    {
+        $post = Post::find($id);
+
+        // check for the correct User
+        if ($this->__checkCorrectUser($post)) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
+        $post->created_at = now();
+        $post->save();
+
+        // Share it on Facebook
+        // ....
+
+        return $this->index();
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $post = Post::find($id);
+
+        // check for the correct User
+        if ($this->__checkCorrectUser($post)) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
+        return view("publish.show")->with("post", $post);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        $this->__validate($request);
+
+        $post = Post::find($id);
+
+        // check for the correct User
+        if ($this->__checkCorrectUser($post)) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
+        if ($post->created_at < now()) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Update");
+        }
+
+        // Delete the media
+        if ($post->type === "Image") {
+            Storage::delete("public/images/" . $post->media);
+        }
+        if ($post->type === "Video") {
+            Storage::delete("public/videos/" . $post->media);
+        }
+
+        // Storage the data
+        $this->__storage($request, $post);
+
+        return $this->index();
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $post = Post::find($id);
+
+        // check for the correct User
+        if ($this->__checkCorrectUser($post)) {
+            return redirect()->route("publish.index")
+                ->with("error", "Unauthorized Page");
+        }
+
+        $post->delete();
+
+        // Remove Media
+        if ($post->type === "Video") {
+            Storage::delete("public/videos/" . $post->media);
+        } else if ($post->type === "Image") {
+            Storage::delete("public/images/" . $post->media);
+        }
+
+        return $this->index();
+    }
+
+    /**
+     * Check for the correct User
+     */
+    private function __checkCorrectUser($post)
+    {
+        return (!isset($post)) ||
+            (auth()->user()->id !== $post->page->user->id);
+    }
+
+    /**
+     * Get data from User ($request) and
+     * Storage the post into Database
+     */
+    private function __storage($request, $post) {
         // Handle social media (Image/Video) upload
         $post->type = "Status";
         $post->media = "null";
@@ -87,122 +217,29 @@ class PostsController extends Controller
         $post->save();
 
         // Upload the Media
-        if ($post->type === "video") {
+        if ($post->type === "Video") {
             $request->video->storeAs("public/videos", $post->media);
         }
         if ($post->type === "Image") {
             $request->image->storeAs("public/images", $post->media);
         }
 
-        // Share it on Facebook
-        // ....
-
-        return $this->index();
+        // Share the post on Facebook
+        if ($post->created_at <= now()) {
+            $this->share($post->id);
+        }
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Validate the data in the request.
      */
-    public function share($id)
-    {
-        $post = Post::find($id);
-
-        // check for the correct User
-        if ($this->__checkCorrectUser($post)) {
-            return redirect()->route("publish.index")
-                ->with("error", "Unauthorized Page");
-        }
-
-        $post->created_at = now();
-        $post->save();
-
-        // Share it on Facebook
-        // ....
-
-        return $this->index();
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $post = Post::find($id);
-
-        // check for the correct User
-        if ($this->__checkCorrectUser($post)) {
-            return redirect()->route("publish.index")
-                ->with("error", "Unauthorized Page");
-        }
-
-
-        return view("publish.show")->with("post", $post);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $post = Post::find($id);
-
-        // check for the correct User
-        // check for the correct User
-        if ($this->__checkCorrectUser($post)) {
-            return redirect()->route("publish.index")
-                ->with("error", "Unauthorized Page");
-        }
-
-        return [
-            $request,
-            $id
-        ];
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        $post = Post::find($id);
-
-        // check for the correct User
-        if ($this->__checkCorrectUser($post)) {
-            return redirect()->route("publish.index")
-                ->with("error", "Unauthorized Page");
-        }
-
-        $post->delete();
-
-        // Remove Media
-        if ($post->type === "Video") {
-            Storage::delete("public/videos/" . $post->media);
-        } else if ($post->type === "Image") {
-            Storage::delete("public/images/" . $post->media);
-        }
-
-        return $this->index();
-    }
-
-    /**
-     * Check for the correct User
-     */
-    private function __checkCorrectUser($post)
-    {
-        return (!isset($post)) ||
-            (auth()->user()->id !== $post->page->user->id);
+    private function __validate($request) {
+        $this->validate($request, [
+            'description' => 'max:65535',
+            'video' => 'mimes:mp4,ogx,oga,ogv,ogg,webm|nullable|max:19999',
+            'image' => 'image|nullable|max:1999',
+            'page_id' => 'required|exists:pages,id',
+            'schedule' => 'date_format:Y-m-d H:i:s'
+        ]);
     }
 }

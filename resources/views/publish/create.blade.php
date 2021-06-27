@@ -1,14 +1,14 @@
-<form id="form_id" action={{ route("publish.create") }} method="POST" enctype="multipart/form-data">
+<form action="{{ route("publish.create") }}" method="POST" enctype="multipart/form-data">
     @csrf
 
-    <div class="modal" id=@yield("post_modal_id", "create_post")>
+    <div class="modal" id="create_post">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
 
                     {{-- Modal Title --}}
                     <h4 class="modal-title">
-                       @yield('post_modal_title', "Create Post")
+                        Create Post
                     </h4>
 
                     {{-- For closing--}}
@@ -70,7 +70,7 @@
                 {{-- Modal Footer --}}
                 <div class="modal-footer">
                     <button type="submit" onclick="publishNow()" class="btn btn-primary"> Publish Now </button>
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target=@yield("schedule_button_id", "#create_schedule")> Schedule </button>
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#create_schedule"> Schedule </button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"> Cancel </button>
                 </div>
         </div>
@@ -79,13 +79,13 @@
 
 
     <!-- Schedule Section -->
-    <div class="modal" id=@yield("schedule_modal_id", "create_schedule") data-backdrop="static">
+    <div class="modal" id="create_schedule" data-backdrop="static">
         <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
               <!-- Schedule Title -->
             <h4 class="modal-title">
-                @yield("schedule_modal_title", "Schedule Post")
+                Schedule Post
             </h4>
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             </div><div class="container"></div>
@@ -104,3 +104,36 @@
         </div>
     </div>
 </form>
+
+<script>
+    /***********************************************
+    *********** Display Image or Video   ***********
+    ***********************************************/
+    let image = document.getElementById("add_image");
+    let video = document.getElementById("add_video");
+    let img = document.getElementById("show_image");
+    let vid = document.getElementById("show_video");
+
+    // To display the image selected by the user
+    image.addEventListener("change", function(event) {
+        img.style.display = "inline";
+        vid.style.display = "none";
+        video.value = null;
+        img.src = URL.createObjectURL(event.target.files[0]);
+    })
+
+    // To display the video selected by the user
+    video.addEventListener("change", function(event) {
+        vid.style.display = "inline";
+        img.style.display = "none";
+        image.value = null;
+        vid.src = URL.createObjectURL(event.target.files[0]);
+    })
+
+    /**
+    * Publish Now by Delete schedule posts
+    */
+    function publishNow(event){
+        document.getElementById("schedule").value =  null;
+    }
+</script>
