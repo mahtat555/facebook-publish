@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -7,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PostsController;
 use App\Http\Controllers\PagesController;
+use App\Http\Controllers\FacebookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -123,3 +125,14 @@ Route::delete(
     '/connect/{id}',
     [PagesController::class, 'destroy']
 )->name('connect.delete');
+
+// Login with Facebook
+Route::get(
+    '/login/facebook',
+    [FacebookController::class, "redirectToFacebook"]
+)->name("login.facebook");
+
+Route::get(
+    '/login/facebook/callback',
+    [FacebookController::class, "handleFacebookCallback"]
+);

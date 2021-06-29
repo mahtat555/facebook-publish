@@ -15,7 +15,7 @@
                         @endif
                         <p class="text-center">
                             <a class="btn btn-outline-primary" role="button" href="{{ route('publish.index') }}"> Publish </a>
-                            <a class="btn btn-outline-primary" role="button" href="{{ route('publish.index') }}"> Connect </a>
+                            <a class="btn btn-outline-primary" role="button" href="{{ route('connect.index') }}"> Connect </a>
                         </p>
                     </div>
                 </div>
