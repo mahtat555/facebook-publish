@@ -108,9 +108,20 @@ Route::get(
     [PagesController::class, 'index']
 )->name('connect.index');
 
+// Search Facebook pages
+Route::get(
+    '/connect/search',
+    [PagesController::class, 'search']
+)->name('connect.search');
+
+Route::post(
+    '/connect/search',
+    [PagesController::class, 'select']
+);
+
 // Select some Facebook pages
 Route::post(
-    '/connect',
+    '/connect/select',
     [PagesController::class, 'store']
 )->name('connect.select');
 

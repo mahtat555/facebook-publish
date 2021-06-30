@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+
 use App\Models\User;
 
 class FacebookController extends Controller
@@ -48,16 +50,30 @@ class FacebookController extends Controller
 
         // Modify the data of the current user
         $user->id_fb = $user_fb->getId();
-        //$user->token_fb = $token;
+        $user->token_fb = $token;
         $user->save();
 
         return redirect()->route("connect.index");
     }
 
+    public function search(string $query)
+    {
+        // Get User token from database
+        $user = User::find($id = auth()->user()->id);
+        $token = $user->token_fb;
+
+        $this->__config();
+
+        $search = $this->fb->get("/search?q=$query&type=page", $token);
+        $search = $search->getGraphEdge()->asArray();
+
+        return $search;
+    }
+
     // Generate the $fb and $helper
     private function __config()
     {
-
+        //session_destroy();
         session_start();
 
         // Facebook application ID

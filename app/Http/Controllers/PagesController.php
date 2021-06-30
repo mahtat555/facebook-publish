@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Page;
+use Facebook\Facebook;
 
 class PagesController extends Controller
 {
@@ -27,24 +28,50 @@ class PagesController extends Controller
     {
         return view("connect.index")->with(
             "pages",
-            auth()->user()->pages()->orderBy("created_at", "desc")->paginate(2)
+            auth()->user()->pages()->orderBy("created_at", "desc")->paginate(5)
         );
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Search Facebook pages.
+     */
+    public function search()
+    {
+        return view("connect.search");
+    }
+
+    /**
+     * Select Some Facebook pages.
+     */
+    public function select(Request $request)
+    {
+        $this->validate($request, [
+            'search' => 'required|string',
+        ]);
+
+        $query = $request->search;
+        $facebookController = new FacebookController();
+        $pages = $facebookController->search($query);
+
+        return view("connect.select")->with("pages", $pages);
+    }
+
+    /**
+     * Stored the selected pages in the database.
      */
     public function store(Request $request)
     {
-        // validation
+        $this->validate($request, [
+            'pages' => 'nullable|array',
+        ]);
+
         // storage
-        foreach ($request->get("pages") as $_page) {
+        foreach ($request->pages as $fb_page_id => $fb_page_name) {
             $page = new Page;
             $page->user_id = auth()->user()->id;
             $page->created_at = now();
+            $page->fb_page_id = $fb_page_id;
+            $page->fb_page_name = $fb_page_name;
             $page->save();
         }
 

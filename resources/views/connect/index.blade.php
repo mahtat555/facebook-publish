@@ -7,9 +7,9 @@
     <!-- Connect Facebook -->
     <hr>
     @if(auth()->user()->id_fb)
-        <button type="button" class="btn btn-primary btn-lg active" data-toggle="modal" data-target="#connect_facebook">
-            Connect Facebook!
-        </button>
+        <a class="btn btn-primary btn-lg active" href="{{ route("connect.search") }}">
+            Connect Facebook
+        </a>
     @else
         <a class="btn btn-primary btn-lg active" href="{{ route("login.facebook") }}">
             Connect Facebook
@@ -49,11 +49,4 @@
 
 {{ $pages->links("pagination::bootstrap-4") }}
 
-<!-- Modal : Connect Facebook -->
-@extends("connect.connect")
-
-<!-- JavaScript -->
-<script>
-    //
-</script>
 @endsection
