@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use \Facebook\Facebook;
+use \Facebook\Exceptions\FacebookResponseException;
+use \Facebook\Exceptions\FacebookSDKException;
 
 use App\Models\User;
 
@@ -21,7 +24,7 @@ class FacebookController extends Controller
      */
     private $helper;
 
-    // Auto
+    // Authentication
     public function __construct()
     {
         $this->middleware('auth');
@@ -31,7 +34,7 @@ class FacebookController extends Controller
     public function redirectToFacebook()
     {
         // Optional permissions
-        $permissions = ['email'];
+        $permissions = ['email', 'user_friends'];
         return $this->__redirect($permissions);
     }
 
@@ -56,6 +59,7 @@ class FacebookController extends Controller
         return redirect()->route("connect.index");
     }
 
+    // Search Facebook Pages by name
     public function search(string $query)
     {
         // Get User token from database
@@ -63,11 +67,65 @@ class FacebookController extends Controller
         $token = $user->token_fb;
 
         $this->__config();
+        $this->fb->setDefaultAccessToken($token);
 
         $search = $this->fb->get("/search?q=$query&type=page", $token);
         $search = $search->getGraphEdge()->asArray();
 
         return $search;
+    }
+
+    // Post message on Facebook page.
+    public function publish_message($fb_page_id, $token, $message)
+    {
+        $this->__config();
+
+        $query = '/' . $fb_page_id . '/feed';
+        $data = ['message' => $message];
+
+        $this->__post($query, $data, $token);
+    }
+
+    // Upload images on Facebook Page.
+    public function upload_image($fb_page_id, $token, $image_src, $message)
+    {
+        $this->__config();
+
+        $query = '/' . $fb_page_id . '/photos';
+        $data = [
+            'source' => $this->fb->fileToUpload($image_src),
+            'message' => $message
+        ];
+
+        $this->__post($query, $data, $token);
+    }
+
+    // Upload videos on Facebook Page.
+    public function upload_video($fb_page_id, $token, $video_src, $description)
+    {
+        $this->__config();
+
+        $query = '/' . $fb_page_id . '/videos';
+        $data = [
+            'title' => null,
+            'description' => $description,
+            'source' => $this->fb->videoToUpload($video_src),
+        ];
+
+        $this->__post($query, $data, $token);
+    }
+
+    private function __post($query, $data, $token)
+    {
+        try {
+            $post = $this->fb->post($query, $data, $token);
+            $post = $post->getGraphNode()->asArray();
+            return $post["id"];
+        } catch (FacebookResponseException $e) {
+            dd('Graph returned an error: ' . $e->getMessage());
+        } catch (FacebookSDKException $e) {
+            dd('Facebook SDK returned an error: ' . $e->getMessage());
+        }
     }
 
     // Generate the $fb and $helper
@@ -82,7 +140,7 @@ class FacebookController extends Controller
         // Facebook application  secret key.
         $app_secret = config('services.facebook.app_secret');
 
-        $this->fb = new \Facebook\Facebook([
+        $this->fb = new Facebook([
             'app_id' => $app_id,
             'app_secret' => $app_secret,
             'default_graph_version' => 'v2.10',
@@ -112,9 +170,9 @@ class FacebookController extends Controller
 
         try {
             $token = $this->helper->getAccessToken();
-        } catch (\Facebook\Exceptions\FacebookResponseException $e) {
+        } catch (FacebookResponseException $e) {
             dd('Graph returned an error: ' . $e->getMessage());
-        } catch (\Facebook\Exceptions\FacebookSDKException $e) {
+        } catch (FacebookSDKException $e) {
             dd('Facebook SDK returned an error: ' . $e->getMessage());
         }
 

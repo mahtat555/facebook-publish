@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 use App\Models\Post;
+use Facebook\FacebookClient;
 
 class PostsController extends Controller
 {
@@ -18,9 +19,7 @@ class PostsController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Display a listing of the User posts.
      */
     public function index()
     {
@@ -31,10 +30,7 @@ class PostsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Store a newly created Post in storage.
      */
     public function store(Request $request)
     {
@@ -50,9 +46,6 @@ class PostsController extends Controller
 
     /**
      * Share the Post Now.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function share($id)
     {
@@ -80,10 +73,7 @@ class PostsController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Display the specified Post.
      */
     public function show($id)
     {
@@ -99,11 +89,7 @@ class PostsController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Update the specified Post in storage.
      */
     public function update(Request $request, $id)
     {
@@ -138,10 +124,7 @@ class PostsController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Remove the specified Post from storage.
      */
     public function destroy($id)
     {
@@ -252,17 +235,39 @@ class PostsController extends Controller
         ]);
     }
 
-
     /**
      * Share the Posts On Facebook.
-     *
-     * @param  Post  $post  The post to share
      */
     public function share_fb($post)
     {
+        $fb_controller = new FacebookController;
+
+        $fb_page_id = $post->page->fb_page_id;
+        $token = $post->page->user->token_fb;
+        $message = $post->description;
+
+        if ($post->type === "Status") {
+            // Post message on Facebook Page.
+            $fb_post_id =$fb_controller->publish_message($fb_page_id,
+                $token, $message);
+        }
+        elseif ($post->type === "Image") {
+            // Upload image on Facebook Page.
+            $image_src = "/storage/images/" . $post->media;
+            $fb_post_id = $fb_controller->upload_image($fb_page_id, $token,
+                $image_src, $message);
+        }
+        else {
+            // Upload video on Facebook Page.
+            $video_src = "/storage/videos/" . $post->media;
+            $fb_post_id = $fb_controller->upload_video($fb_page_id, $token,
+                $video_src, $message);
+        }
+
+        $post->fb_post_id = $fb_post_id;
         $post->scheduled = false;
         $post->save();
 
-       // Share the Posts On Facebook.
+        return $this->index();
     }
 }

@@ -11,8 +11,6 @@ class PagesController extends Controller
 {
     /**
      * Create a new controller instance.
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -20,16 +18,14 @@ class PagesController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Display a listing of the User pages.
      */
     public function index()
     {
-        return view("connect.index")->with(
-            "pages",
-            auth()->user()->pages()->orderBy("created_at", "desc")->paginate(5)
-        );
+        $pages = auth()->user()->pages()
+            ->orderBy("created_at", "desc")->paginate(5);
+
+        return view("connect.index")->with("pages", $pages);
     }
 
     /**
@@ -62,7 +58,7 @@ class PagesController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'pages' => 'nullable|array',
+            'pages' => 'required|array',
         ]);
 
         // storage
@@ -79,11 +75,7 @@ class PagesController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Update the specified Page.
      */
     public function update($id)
     {
@@ -98,10 +90,7 @@ class PagesController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Remove the specified Page.
      */
     public function destroy($id)
     {
